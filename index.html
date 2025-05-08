@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Wallet - Parent Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes successCheckmark {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .success-animation {
+            animation: successCheckmark 0.6s ease-in-out;
+        }
+        
+        .transaction-row:hover {
+            background-color: #f8fafc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .blur-bg {
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Login Page -->
+    <div id="login-page" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <img src="https://via.placeholder.com/150x50?text=Campus+Wallet" alt="Campus Wallet Logo" class="h-12 mx-auto mb-4">
+                <h1 class="text-2xl font-bold text-gray-800">Parent Portal</h1>
+                <p class="text-gray-600 mt-2">Manage your child's campus wallet</p>
+            </div>
+            
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500">+91</span>
+                        </div>
+                        <input type="tel" id="phone" name="phone" class="pl-12 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border" placeholder="9876543210" required>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" name="password" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border" placeholder="••••••••" required>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                    </div>
+                    
+                    <div class="text-sm">
+                        <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Forgot password?</a>
+                    </div>
+                </div>
+                
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                        Sign in
+                    </button>
+                </div>
+            </form>
+            
+            <div class="mt-6 text-center text-sm text-gray-600">
+                <p>Test credentials: <span class="font-medium">9876543210</span> / <span class="font-medium">Parent123</span></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Dashboard (hidden initially) -->
+    <div id="dashboard" class="hidden min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <img src="https://via.placeholder.com/150x50?text=Campus+Wallet" alt="Logo" class="h-8">
+                    <span class="ml-3 text-lg font-semibold text-gray-900">Parent Portal</span>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button class="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <div class="relative">
+                        <button id="profile-btn" class="flex items-center space-x-2 focus:outline-none">
+                            <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">P</div>
+                            <span class="text-sm font-medium text-gray-700">Parent User</span>
+                        </button>
+                        <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                            <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Left Sidebar -->
+                <div class="w-full lg:w-1/4 space-y-6">
+                    <!-- Navigation -->
+                    <nav class="bg-white rounded-lg shadow p-4">
+                        <ul class="space-y-2">
+                            <li>
+                                <a href="#" id="dashboard-link" class="flex items-center space-x-3 p-2 rounded-md bg-blue-50 text-blue-600 font-medium">
+                                    <i class="fas fa-home w-5 text-center"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" id="add-money-link" class="flex items-center space-x-3 p-2 rounded-md text-gray-700 hover:bg-gray-50">
+                                    <i class="fas fa-wallet w-5 text-center"></i>
+                                    <span>Add Money</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" id="transactions-link" class="flex items-center space-x-3 p-2 rounded-md text-gray-700 hover:bg-gray-50">
+                                    <i class="fas fa-exchange-alt w-5 text-center"></i>
+                                    <span>Transactions</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" id="children-link" class="flex items-center space-x-3 p-2 rounded-md text-gray-700 hover:bg-gray-50">
+                                    <i class="fas fa-child w-5 text-center"></i>
+                                    <span>Linked Children</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" id="settings-link" class="flex items-center space-x-3 p-2 rounded-md text-gray-700 hover:bg-gray-50">
+                                    <i class="fas fa-cog w-5 text-center"></i>
+                                    <span>Settings</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="font-medium text-gray-900 mb-3">Quick Actions</h3>
+                        <div class="space-y-2">
+                            <button class="w-full flex items-center justify-between p-2 rounded-md bg-green-50 text-green-600 hover:bg-green-100">
+                                <span>Add Money</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <button class="w-full flex items-center justify-between p-2 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100">
+                                <span>View Statements</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <button class="w-full flex items-center justify-between p-2 rounded-md bg-purple-50 text-purple-600 hover:bg-purple-100">
+                                <span>Set Limits</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Main Content Area -->
+                <div class="w-full lg:w-3/4">
+                    <!-- Dashboard Content -->
+                    <div id="dashboard-content">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">Welcome back, Parent!</h2>
+                            <p class="text-gray-600">Here's an overview of your child's campus wallet.</p>
+                        </div>
+                        
+                        <!-- Wallet Balance Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div class="bg-white rounded-xl shadow p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-medium text-gray-700">Rahul's Wallet</h3>
+                                    <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                        <i class="fas fa-user-graduate"></i>
+                                    </div>
+                                </div>
+                                <p class="text-3xl font-bold text-gray-900 mb-2">₹1,245.50</p>
+                                <p class="text-sm text-gray-500">Last updated: Just now</p>
+                                <div class="mt-4 flex space-x-3">
+                                    <button class="add-money-btn px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                        Add Money
+                                    </button>
+                                    <button class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        View Transactions
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-medium text-gray-700">Priya's Wallet</h3>
+                                    <div class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                        <i class="fas fa-user-graduate"></i>
+                                    </div>
+                                </div>
+                                <p class="text-3xl font-bold text-gray-900 mb-2">₹2,780.00</p>
+                                <p class="text-sm text-gray-500">Last updated: 2 hours ago</p>
+                                <div class="mt-4 flex space-x-3">
+                                    <button class="add-money-btn px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                        Add Money
+                                    </button>
+                                    <button class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        View Transactions
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recent Transactions -->
+                        <div class="bg-white rounded-xl shadow overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <h3 class="text-lg font-medium text-gray-900">Recent Transactions</h3>
+                            </div>
+                            <div class="divide-y divide-gray-200">
+                                <div class="transaction-row px-6 py-4 hover:cursor-pointer transition-all duration-200">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                                <i class="fas fa-rupee-sign"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900">Cafeteria Payment</p>
+                                                <p class="text-sm text-gray-500">Rahul • 12 May, 10:30 AM</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="font-medium text-red-600">- ₹120.00</p>
+                                            <p class="text-xs text-gray-500">Completed</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="transaction-row px-6 py-4 hover:cursor-pointer transition-all duration-200">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                                <i class="fas fa-wallet"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900">Wallet Top-up</p>
+                                                <p class="text-sm text-gray-500">You • 11 May, 5:15 PM</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="font-medium text-green-600">+ ₹1,000.00</p>
+                                            <p class="text-xs text-gray-500">Completed</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="transaction-row px-6 py-4 hover:cursor-pointer transition-all duration-200">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                                <i class="fas fa-book"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900">Library Fine</p>
+                                                <p class="text-sm text-gray-500">Priya • 10 May, 3:45 PM</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="font-medium text-red-600">- ₹50.00</p>
+                                            <p class="text-xs text-gray-500">Completed</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="px-6 py-3 bg-gray-50 text-right">
+                                <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500">View all transactions</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Add Money Content (hidden initially) -->
+                    <div id="add-money-content" class="hidden">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">Add Money to Wallet</h2>
+                            <p class="text-gray-600">Quickly top up your child's campus wallet.</p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <h3 class="text-lg font-medium text-gray-900">Select Child</h3>
+                            </div>
+                            <div class="p-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                    <div class="child-option border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-colors duration-200">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                                <i class="fas fa-user-graduate text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900">Rahul Sharma</p>
+                                                <p class="text-sm text-gray-500">Current balance: ₹1,245.50</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="child-option border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-colors duration-200">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                                <i class="fas fa-user-graduate text-xl"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900">Priya Sharma</p>
+                                                <p class="text-sm text-gray-500">Current balance: ₹2,780.00</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Amount to Add</label>
+                                    <div class="relative rounded-md shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500">₹</span>
+                                        </div>
+                                        <input type="number" id="amount" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-8 pr-12 py-3 border-gray-300 rounded-md" placeholder="0.00">
+                                        <div class="absolute inset-y-0 right-0 flex items-center">
+                                            <span class="text-gray-500 mr-3">.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div class="payment-method border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-colors duration-200">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                                    <i class="fab fa-google-pay"></i>
+                                                </div>
+                                                <span class="font-medium">Google Pay</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="payment-method border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-colors duration-200">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                                    <i class="fas fa-mobile-alt"></i>
+                                                </div>
+                                                <span class="font-medium">UPI</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="payment-method border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-colors duration-200">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
+                                                    <i class="far fa-credit-card"></i>
+                                                </div>
+                                                <span class="font-medium">Card</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-end">
+                                    <button id="confirm-payment-btn" class="px-6 py-3 bg-green-600 text-white rounded-md text-base font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-200">
+                                        Confirm Payment
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Transactions Content (hidden initially) -->
+                    <div id="transactions-content" class="hidden">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">Transaction History</h2>
+                            <p class="text-gray-600">View and manage all wallet transactions.</p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                                <h3 class="text-lg font-medium text-gray-900">All Transactions</h3>
+                                <div class="flex space-x-3">
+                                    <div class="relative">
+                                        <select class="appearance-none bg-gray-100 border border-gray-300 rounded-md pl-3 pr-8 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                            <option>Last 7 days</option>
+                                            <option>Last 30 days</option>
+                                            <option>Last 3 months</option>
+                                            <option>All time</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-500"></i>
+                                        </div>
+                                    </div>
+                                    <button class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <i class="fas fa-download mr-2"></i> Export
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Child</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr class="hover:bg-gray-50 cursor-pointer">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">12 May, 10:30 AM</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
+                                                        <i class="fas fa-rupee-sign"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-sm font-medium text-gray-900">Cafeteria Payment</div>
+                                                        <div class="text-sm text-gray-500">Lunch</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Rahul</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">- ₹120.00</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completed</span>
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr class="hover:bg-gray-50 cursor-pointer">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">11 May, 5:15 PM</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+                                                        <i class="fas fa-wallet"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-sm font-medium text-gray-900">Wallet Top-up</div>
+                                                        <div class="text-sm text-gray-500">Google Pay</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Rahul</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">+ ₹1,000.00</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completed</span>
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr class="hover:bg-gray-50 cursor-pointer">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10 May, 3:45 PM</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mr-3">
+                                                        <i class="fas fa-book"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-sm font-medium text-gray-900">Library Fine</div>
+                                                        <div class="text-sm text-gray-500">Late return</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Priya</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">- ₹50.00</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completed</span>
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr class="hover:bg-gray-50 cursor-pointer">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">8 May, 1:20 PM</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 mr-3">
+                                                        <i class="fas fa-tshirt"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-sm font-medium text-gray-900">Uniform Purchase</div>
+                                                        <div class="text-sm text-gray-500">PE Kit</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Priya</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">- ₹750.00</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completed</span>
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr class="hover:bg-gray-50 cursor-pointer">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5 May, 9:10 AM</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+                                                        <i class="fas fa-wallet"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-sm font-medium text-gray-900">Wallet Top-up</div>
+                                                        <div class="text-sm text-gray-500">Credit Card</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Priya</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">+ ₹2,000.00</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completed</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                                <div class="text-sm text-gray-500">
+                                    Showing <span class="font-medium">1</span> to <span class="font-medium">5</span> of <span class="font-medium">24</span> transactions
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                        Previous
+                                    </button>
+                                    <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Children Content (hidden initially) -->
+                    <div id="children-content" class="hidden">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">Linked Children</h2>
+                            <p class="text-gray-600">Manage your linked children's accounts.</p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                                <h3 class="text-lg font-medium text-gray-900">Your Children</h3>
+                                <button class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <i class="fas fa-plus mr-2"></i> Add Child
+                                </button>
+                            </div>
+                            
+                            <div class="divide-y divide-gray-200">
+                                <div class="p-6">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="h-14 w-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                                <i class="fas fa-user-graduate text-2xl"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900">Rahul Sharma</p>
+                                                <p class="text-sm text-gray-500">Grade 10 • Student ID: STU2023001</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <button class="px-4 py-2 bg-red-100 text-red-600 rounded-md text-sm font-medium hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                                Unlink
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <p class="text-sm font-medium text-gray-500 mb-1">Wallet Balance</p>
+                                            <p class="text-xl font-bold text-gray-900">₹1,245.50</p>
+                                        </div>
+                                        
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <p class="text-sm font-medium text-gray-500 mb-1">Last Transaction</p>
+                                            <p class="text-sm font-medium text-gray-900">12 May, 10:30 AM</p>
+                                            <p class="text-xs text-gray-500">Cafeteria Payment</p>
+                                        </div>
+                                        
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <p class="text-sm font-medium text-gray-500 mb-1">Daily Limit</p>
+                                            <p class="text-sm font-medium text-gray-900">₹500.00</p>
+                                            <button class="mt-2 text-xs text-blue-600 hover:text-blue-500">Change limit</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-6">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="h-14 w-14 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                                <i class="fas fa-user-graduate text-2xl"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900">Priya Sharma</p>
+                                                <p class="text-sm text-gray-500">Grade 8 • Student ID: STU2023002</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <button class="px-4 py-2 bg-red-100 text-red-600 rounded-md text-sm font-medium hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                                Unlink
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <p class="text-sm font-medium text-gray-500 mb-1">Wallet Balance</p>
+                                            <p class="text-xl font-bold text-gray-900">₹2,780.00</p>
+                                        </div>
+                                        
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <p class="text-sm font-medium text-gray-500 mb-1">Last Transaction</p>
+                                            <p class="text-sm font-medium text-gray-900">10 May, 3:45 PM</p>
+                                            <p class="text-xs text-gray-500">Library Fine</p>
+                                        </div>
+                                        
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <p class="text-sm font-medium text-gray-500 mb-1">Daily Limit</p>
+                                            <p class="text-sm font-medium text-gray-900">₹300.00</p>
+                                            <button class="mt-2 text-xs text-blue-600 hover:text-blue-500">Change limit</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="px-6 py-4 bg-gray-50">
+                                <p class="text-sm text-gray-500">To link a new child, you'll need their student ID and verification code provided by the school.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Content (hidden initially) -->
+                    <div id="settings-content" class="hidden">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">Account Settings</h2>
+                            <p class="text-gray-600">Manage your account preferences and security.</p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <h3 class="text-lg font-medium text-gray-900">Profile Information</h3>
+                            </div>
+                            
+                            <div class="p-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                    <div>
+                                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                        <input type="text" id="name" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border" value="Parent User">
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                        <input type="email" id="email" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border" value="parent@example.com">
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                        <input type="tel" id="phone" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border" value="9876543210">
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-end">
+                                    <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200 mr-3">
+                                        Cancel
+                                    </button>
+                                    <button class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow overflow-hidden mt-6">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <h3 class="text-lg font-medium text-gray-900">Security</h3>
+                            </div>
+                            
+                            <div class="p-6">
+                                <div class="mb-6">
+                                    <label for="current-password" class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                                    <input type="password" id="current-password" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border" placeholder="••••••••">
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <label for="new-password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                                    <input type="password" id="new-password" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border" placeholder="••••••••">
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                                    <input type="password" id="confirm-password" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 border" placeholder="••••••••">
+                                </div>
+                                
+                                <div class="flex justify-end">
+                                    <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200 mr-3">
+                                        Cancel
+                                    </button>
+                                    <button class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
+                                        Update Password
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow overflow-hidden mt-6">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <h3 class="text-lg font-medium text-gray-900">Notifications</h3>
+                            </div>
+                            
+                            <div class="p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">Wallet Transactions</p>
+                                        <p class="text-sm text-gray-500">Receive alerts for all wallet activities</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">Low Balance Alerts</p>
+                                        <p class="text-sm text-gray-500">Get notified when balance goes below ₹200</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">Monthly Statements</p>
+                                        <p class="text-sm text-gray-500">Email summary of monthly transactions</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Payment Success Modal (hidden initially) -->
+    <div id="payment-success-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 blur-bg">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-8 text-center slide-in">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                <i class="fas fa-check text-green-600 text-2xl success-animation"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Payment Successful!</h3>
+            <p class="text-gray-600 mb-6">₹1,000.00 has been added to Rahul's wallet.</p>
+            <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                <p class="text-sm font-medium text-gray-900">Transaction ID: TXN20230512123456</p>
+                <p class="text-sm text-gray-500">12 May 2023, 11:45 AM</p>
+            </div>
+            <button id="success-modal-close" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
+                Back to Dashboard
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const loginPage = document.getElementById('login-page');
+        const dashboard = document.getElementById('dashboard');
+        const loginForm = document.getElementById('login-form');
+        const logoutBtn = document.getElementById('logout-btn');
+        const profileBtn = document.getElementById('profile-btn');
+        const profileDropdown = document.getElementById('profile-dropdown');
+        
+        // Navigation Links
+        const dashboardLink = document.getElementById('dashboard-link');
+        const addMoneyLink = document.getElementById('add-money-link');
+        const transactionsLink = document.getElementById('transactions-link');
+        const childrenLink = document.getElementById('children-link');
+        const settingsLink = document.getElementById('settings-link');
+        
+        // Content Sections
+        const dashboardContent = document.getElementById('dashboard-content');
+        const addMoneyContent = document.getElementById('add-money-content');
+        const transactionsContent = document.getElementById('transactions-content');
+        const childrenContent = document.getElementById('children-content');
+        const settingsContent = document.getElementById('settings-content');
+        
+        // Payment Modal Elements
+        const confirmPaymentBtn = document.getElementById('confirm-payment-btn');
+        const paymentSuccessModal = document.getElementById('payment-success-modal');
+        const successModalClose = document.getElementById('success-modal-close');
+        
+        // Add money buttons
+        const addMoneyButtons = document.querySelectorAll('.add-money-btn');
+        
+        // Test credentials
+        const TEST_PHONE = '9876543210';
+        const TEST_PASSWORD = 'Parent123';
+        
+        // Login Form Submission
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple validation - in a real app, this would be a server-side check
+            if (phone === TEST_PHONE && password === TEST_PASSWORD) {
+                // Hide login page, show dashboard
+                loginPage.classList.add('hidden');
+                dashboard.classList.remove('hidden');
+                
+                // Reset form
+                loginForm.reset();
+            } else {
+                alert('Invalid phone number or password. Please try again.\n\nTest credentials:\nPhone: 9876543210\nPassword: Parent123');
+            }
+        });
+        
+        // Logout Button
+        logoutBtn.addEventListener('click', function() {
+            dashboard.classList.add('hidden');
+            loginPage.classList.remove('hidden');
+            
+            // Reset to dashboard view
+            showSection(dashboardContent);
+            resetNavLinks();
+            dashboardLink.classList.add('bg-blue-50', 'text-blue-600');
+        });
+        
+        // Profile Dropdown Toggle
+        profileBtn.addEventListener('click', function() {
+            profileDropdown.classList.toggle('hidden');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                profileDropdown.classList.add('hidden');
+            }
+        });
+        
+        // Navigation Link Handlers
+        dashboardLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection(dashboardContent);
+            resetNavLinks();
+            this.classList.add('bg-blue-50', 'text-blue-600');
+        });
+        
+        addMoneyLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection(addMoneyContent);
+            resetNavLinks();
+            this.classList.add('bg-blue-50', 'text-blue-600');
+        });
+        
+        transactionsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection(transactionsContent);
+            resetNavLinks();
+            this.classList.add('bg-blue-50', 'text-blue-600');
+        });
+        
+        childrenLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection(childrenContent);
+            resetNavLinks();
+            this.classList.add('bg-blue-50', 'text-blue-600');
+        });
+        
+        settingsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection(settingsContent);
+            resetNavLinks();
+            this.classList.add('bg-blue-50', 'text-blue-600');
+        });
+        
+        // Add money buttons in dashboard
+        addMoneyButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                showSection(addMoneyContent);
+                resetNavLinks();
+                addMoneyLink.classList.add('bg-blue-50', 'text-blue-600');
+            });
+        });
+        
+        // Payment Confirmation
+        confirmPaymentBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            paymentSuccessModal.classList.remove('hidden');
+        });
+        
+        // Close success modal
+        successModalClose.addEventListener('click', function() {
+            paymentSuccessModal.classList.add('hidden');
+            showSection(dashboardContent);
+            resetNavLinks();
+            dashboardLink.classList.add('bg-blue-50', 'text-blue-600');
+        });
+        
+        // Helper function to show a section and hide others
+        function showSection(section) {
+            [dashboardContent, addMoneyContent, transactionsContent, childrenContent, settingsContent].forEach(sec => {
+                sec.classList.add('hidden');
+            });
+            section.classList.remove('hidden');
+        }
+        
+        // Helper function to reset nav links styling
+        function resetNavLinks() {
+            [dashboardLink, addMoneyLink, transactionsLink, childrenLink, settingsLink].forEach(link => {
+                link.classList.remove('bg-blue-50', 'text-blue-600');
+                link.classList.add('text-gray-700', 'hover:bg-gray-50');
+            });
+        }
+        
+        // Child selection in add money section
+        const childOptions = document.querySelectorAll('.child-option');
+        childOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                childOptions.forEach(opt => opt.classList.remove('border-blue-500', 'border-2'));
+                this.classList.add('border-blue-500', 'border-2');
+            });
+        });
+        
+        // Payment method selection
+        const paymentMethods = document.querySelectorAll('.payment-method');
+        paymentMethods.forEach(method => {
+            method.addEventListener('click', function() {
+                paymentMethods.forEach(m => m.classList.remove('border-blue-500', 'border-2'));
+                this.classList.add('border-blue-500', 'border-2');
+            });
+        });
+    </script>
+<p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">Made with <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);"><a href="https://enzostvs-deepsite.hf.space" style="color: #fff;text-decoration: underline;" target="_blank" >DeepSite</a> - 🧬 <a href="https://enzostvs-deepsite.hf.space?remix=Nani21062006/campuskart-parent-portal" style="color: #fff;text-decoration: underline;" target="_blank" >Remix</a></p></body>
+</html>
